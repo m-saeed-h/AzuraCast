@@ -92,16 +92,36 @@ RUN touch /var/azuracast/.docker
 
 USER root
 
-VOLUME "/var/azuracast/stations"
-VOLUME "/var/azuracast/backups"
-VOLUME "/var/lib/mysql"
-VOLUME "/var/azuracast/storage/acme"
-VOLUME "/var/azuracast/storage/geoip"
-VOLUME "/var/azuracast/storage/rsas"
-VOLUME "/var/azuracast/storage/sftpgo"
-VOLUME "/var/azuracast/storage/shoutcast2"
-VOLUME "/var/azuracast/storage/stereo_tool"
-VOLUME "/var/azuracast/storage/uploads"
+services:
+  db:
+    image: mariadb:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: azuracast
+      MYSQL_DATABASE: azuracast
+      MYSQL_USER: azuracast
+      MYSQL_PASSWORD: azuracast
+    volumes:
+      - railway:/var/lib/mysql
+  
+  influxdb:
+    image: influxdb:latest
+    restart: always
+    volumes:
+      - railway:/var/lib/influxdb
+  
+  redis:
+    image: redis:latest
+    restart: always
+    volumes:
+      - railway:/var/lib/redis
+
+  stations:
+    image: azuracast/station:latest
+    restart: always
+    volumes:
+      - railway:/var/azuracast
+
 
 EXPOSE 80 443 2022
 EXPOSE 8000-8999
